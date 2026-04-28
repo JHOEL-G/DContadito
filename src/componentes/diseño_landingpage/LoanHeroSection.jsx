@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LoanHeroUltra = () => {
-    const [amount, setAmount] = useState(25000);
+    const [amount, setAmount] = useState(70000);
     const maxLoan = 70000;
     const estimatedPayment = (amount * 0.1135).toFixed(2);
     const navigate = useNavigate();
 
     const formatter = new Intl.NumberFormat('es-MX', {
-        style: 'currency', currency: 'MXN', minimumFractionDigits: 0,
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 0,
     });
 
     const handleSolicitar = () => {
@@ -16,71 +18,58 @@ const LoanHeroUltra = () => {
     };
 
     return (
-        <section className="bg-white text-gray-900 min-h-[90vh] relative flex items-center justify-center overflow-hidden font-sans py-20">
-            <div className="max-w-[1500px] mx-auto w-full px-6 relative z-10">
-                <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
+        <section className="bg-white p-6 md:p-10 mt-16 relative max-w-[97%] mx-auto">
 
-                    <div className="w-full lg:w-1/2 space-y-10">
-                        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-gray-100 border-l-2 border-[#B4D62E] text-gray-600 text-xs font-black uppercase tracking-[0.3em]">
-                            Status: Unlimited
-                        </div>
+            <div className="relative">
 
-                        <h1 className="text-7xl md:text-8xl xl:text-[110px] font-black leading-[0.8] tracking-tighter italic uppercase text-gray-900">
-                            Hazlo <br />
-                            <span className="text-[#B4D62E] drop-shadow-[0_0_20px_rgba(180,214,46,0.3)]">Realidad</span> <br />
-                            <span className="text-outline">Ahora.</span>
-                        </h1>
+                <div className="relative min-h-[950px] flex items-center overflow-hidden font-sans rounded-bl-[20rem] shadow-[0_30px_100px_rgba(0,0,0,0.3)]"
+                    style={{ background: 'linear-gradient(135deg, #93c01f 0%, #93c01f 40%, #2a3d5a 70%, #152036 100%)' }}>
 
-                        <p className="text-gray-400 text-lg md:text-xl font-medium max-w-sm leading-tight border-l border-gray-200 pl-6">
-                            No es un préstamo, es el impulso para tu siguiente gran movimiento.
-                        </p>
-
-                        <div className="flex gap-4">
-                            <div className="flex -space-x-4">
-                                {[...Array(4)].map((_, index) => (
-                                    <div key={index} className="w-12 h-12 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-sm">
-                                        <img src={`https://i.pravatar.cc/100?img=${index + 15}`} alt="user" />
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="text-sm">
-                                <p className="font-bold text-gray-900">+10k Usuarios</p>
-                                <p className="text-gray-400 text-xs font-bold">Confiando en Dcontadito</p>
-                            </div>
-                        </div>
+                    <div className="absolute inset-0 z-0">
+                        <img
+                            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=700&q=80"
+                            alt=""
+                            className="w-full h-full object-cover object-center opacity-40 mix-blend-luminosity"
+                        />
                     </div>
 
-                    <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-                        <div className="relative w-full max-w-[500px]">
-                            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-100 via-[#D4FF3F]/20 to-purple-100 blur-3xl opacity-60"></div>
+                    <div className="relative z-20 w-full flex flex-col lg:flex-row items-center justify-center px-10 py-12 gap-8">
 
-                            <div className="relative bg-[#0A0A0A] border border-gray-800 rounded-[4rem] p-10 lg:p-14 shadow-2xl overflow-hidden group">
-                                <div className="text-center mb-12">
-                                    <p className="text-[#D4FF3F] text-[10px] font-black uppercase tracking-[0.4em] mb-4">Selecciona tu poder</p>
-                                    <div className="flex items-center justify-center gap-6">
-                                        <button
-                                            onClick={() => setAmount(Math.max(1000, amount - 5000))}
-                                            className="group relative w-14 h-14 rounded-full border border-white/10 flex items-center justify-center overflow-hidden transition-all hover:border-[#D4FF3F]"
-                                        >
-                                            <div className="absolute inset-0 bg-[#D4FF3F] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                                            <span className="relative z-10 text-2xl font-light text-white group-hover:text-black transition-colors">−</span>
-                                        </button>
+                        <div className="w-full lg:w-1/2 flex flex-col gap-5 items-center text-center">
+                            <div className="inline-flex w-fit items-center px-8 py-2.5 text-white font-black text-sm uppercase tracking-widest"
+                                style={{
+                                    background: '#29b6d8',
+                                    borderRadius: '999px',
+                                    boxShadow: '0 4px 15px rgba(41,182,216,0.4)'
+                                }}>
+                                STATUS: UNLIMITED
+                            </div>
 
-                                        <h3 className="text-5xl md:text-7xl font-black tracking-tighter text-white">
-                                            {formatter.format(amount)}
-                                        </h3>
+                            <h1 className="uppercase leading-[0.9]"
+                                style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em', fontSize: 'clamp(3.5rem, 8vw, 7rem)' }}>
+                                <span className="block text-white font-light">HÁZLO</span>
+                                <span className="block font-black" style={{ color: '#152036' }}>REALIDAD</span>
+                                <span className="block text-white font-light">AHORA</span>
+                            </h1>
 
-                                        <button
-                                            onClick={() => setAmount(Math.min(maxLoan, amount + 5000))}
-                                            className="group relative w-14 h-14 rounded-full border border-white/10 flex items-center justify-center overflow-hidden transition-all hover:border-[#D4FF3F]"
-                                        >
-                                            <div className="absolute inset-0 bg-[#D4FF3F] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                                            <span className="relative z-10 text-2xl font-light text-white group-hover:text-black transition-colors">+</span>
-                                        </button>
-                                    </div>
-                                </div>
+                            <div className="w-28 h-[3px] bg-white rounded-full mt-2" />
+                        </div>
 
-                                <div className="relative mb-16 px-2">
+                        <div className="w-full lg:w-[50%] flex flex-col items-center lg:items-end lg:pr-30 gap-4">
+
+                            <div className="bg-white rounded-[2rem] p-10 w-full max-w-[480px]"
+                                style={{ border: '4px solid #152036', boxShadow: '0 25px 60px rgba(21,32,54,0.4), 0 0 0 1px rgba(21,32,54,0.1)' }}>
+
+                                <p className="text-center text-xs font-black uppercase tracking-[0.3em] text-gray-500 mb-1">
+                                    SELECCIONA TU PODER
+                                </p>
+
+                                <h2 className="text-center font-black mb-4"
+                                    style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontFamily: 'Montserrat, sans-serif', color: '#152036' }}>
+                                    {formatter.format(amount)}
+                                </h2>
+
+                                <div className="relative mb-2 px-1">
                                     <input
                                         type="range"
                                         min="1000"
@@ -88,73 +77,74 @@ const LoanHeroUltra = () => {
                                         step="1000"
                                         value={amount}
                                         onChange={(e) => setAmount(parseInt(e.target.value))}
-                                        className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#D4FF3F]"
+                                        className="w-full cursor-pointer"
+                                        style={{
+                                            WebkitAppearance: 'none',
+                                            height: '4px',
+                                            borderRadius: '2px',
+                                            background: `linear-gradient(to right, #152036 ${(amount / maxLoan) * 100}%, #ddd ${(amount / maxLoan) * 100}%)`,
+                                            outline: 'none',
+                                        }}
                                     />
-                                    <div className="absolute top-6 left-0 w-full flex justify-between text-[9px] font-black text-gray-500 tracking-widest uppercase">
-                                        <span>Base</span>
-                                        <span>Elite Level</span>
+                                    <style>{`
+                                        input[type=range]::-webkit-slider-thumb {
+                                            -webkit-appearance: none;
+                                            width: 18px;
+                                            height: 18px;
+                                            border-radius: 50%;
+                                            background: #152036;
+                                            cursor: pointer;
+                                        }
+                                    `}</style>
+                                    <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase mt-1">
+                                        <span>BASE</span>
+                                        <span>ELITE LEVEL</span>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 mb-10">
-                                    <div className="bg-white/[0.05] border border-white/5 rounded-3xl p-6">
-                                        <p className="text-[9px] uppercase font-black text-gray-500 mb-2 text-center">Pago Quincenal</p>
-                                        <p className="text-2xl font-black text-white tracking-tighter text-center">${estimatedPayment}</p>
+                                <div className="grid grid-cols-2 gap-3 my-5">
+                                    <div className="rounded-xl p-4 text-center" style={{ background: '#152036' }}>
+                                        <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-1">PAGO QUINCENAL</p>
+                                        <p className="text-xl font-black text-white">${estimatedPayment}</p>
                                     </div>
-                                    <div className="bg-white/[0.05] border border-white/5 rounded-3xl p-6">
-                                        <p className="text-[9px] uppercase font-black text-gray-500 mb-2 text-center">Tasa Elite</p>
-                                        <p className="text-2xl font-black text-[#D4FF3F] tracking-tighter text-center">11.35%</p>
+                                    <div className="rounded-xl p-4 text-center" style={{ background: '#152036' }}>
+                                        <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-1">TASA ÉLITE</p>
+                                        <p className="text-xl font-black" style={{ color: '#93c01f' }}>11.35%</p>
                                     </div>
                                 </div>
 
-                                <button className="group relative w-full h-20 bg-[#D4FF3F] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(212,255,63,0.3)] hover:shadow-[#D4FF3F]/50 transition-all duration-500"
+                                <button
                                     onClick={handleSolicitar}
-                                >
-                                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-shimmer transition-transform duration-1000"></div>
-                                    <span className="relative z-10 text-black font-black text-xl uppercase italic tracking-tighter">
-                                        ¡Inyectar Capital Ahora!
-                                    </span>
+                                    className="w-full py-4 rounded-xl font-black text-white text-base uppercase tracking-wider transition-all duration-300 hover:opacity-90"
+                                    style={{ background: '#152036' }}>
+                                    ¡ INYECTAR<br />CAPITAL AHORA !
                                 </button>
 
-                                <p className="text-center text-[9px] text-gray-500 mt-6 font-bold uppercase tracking-widest">
-                                    Aprobación en 120 segundos • Sin aval
+                                <p className="text-center text-[9px] font-black uppercase tracking-widest mt-3"
+                                    style={{ color: '#93c01f' }}>
+                                    APROBACIÓN EN 120 SEGUNDOS - SIN AVAL
                                 </p>
                             </div>
+
+                            <p className="text-white font-bold text-sm text-center max-w-[480px]">
+                                No es un préstamo, es el impulso para tu siguiente gran movimiento.
+                            </p>
                         </div>
                     </div>
                 </div>
+
+                <svg
+                    className="absolute bottom-0 left-0 z-10"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 160 160"
+                    style={{ width: '160px', height: '160px', display: 'block' }}
+                >
+                    <path
+                        d="M0,0 L0,160 L160,160 Q30,100 0,0 Z"
+                        fill="#93c01f"
+                    />
+                </svg>
             </div>
-
-            <style>
-                {`
-    .text-outline {
-        color: transparent;
-        -webkit-text-stroke: 1.5px #111;
-        opacity: 0.8;
-    }
-    
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-    }
-    
-    .group:hover .group-hover\\:animate-shimmer {
-        animation: shimmer 1.5s infinite;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-        appearance: none;
-        width: 35px;
-        height: 35px;
-        background: #D4FF3F;
-        border: 8px solid #0A0A0A;
-        border-radius: 12px;
-        cursor: pointer;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        transform: rotate(45deg);
-    }
-  `}
-            </style>
         </section>
     );
 };
