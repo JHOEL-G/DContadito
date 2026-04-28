@@ -1,23 +1,29 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaWhatsapp } from "react-icons/fa";
 import { menuItems } from "./nav_item/NavItem";
 
 const NavbarPro = () => {
     const navigate = useNavigate();
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [openSubmenu, setOpenSubmenu] = useState(null);
 
     const handleSolicitarAhora = () => {
+        setMobileOpen(false);
         navigate("/solicitar-credito");
     };
 
     return (
-        <nav className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out py-4 px-4`}>
-            <div className={`max-w-[95%] mx-auto px-6 py-2.5 flex justify-between items-center bg-[#152036] backdrop-blur-xl border border-white/10 rounded-[2.5rem] shadow-[0_10px_30px_rgba(21,32,54,0.3)]`}>
+        <nav className="fixed top-0 w-full z-50 py-4 px-4">
+            <div className="max-w-[95%] mx-auto px-6 py-2.5 flex justify-between items-center bg-[#152036] backdrop-blur-xl border border-white/10 rounded-[2.5rem] shadow-[0_10px_30px_rgba(21,32,54,0.3)] relative">
 
+                {/* Logo + Menu Desktop */}
                 <div className="flex items-center gap-10">
-                    <div className="flex items-center gap-3 group cursor-pointer">
+                    <div className="flex items-center gap-3 cursor-pointer">
                         <img src="LOGOB.png" alt="logo dcontadito" className="w-32 h-auto" />
                     </div>
 
+                    {/* Nav links - solo desktop */}
                     <div className="hidden md:flex items-center gap-1">
                         {menuItems.map((item) => (
                             <div key={item.name} className="relative group">
@@ -29,7 +35,7 @@ const NavbarPro = () => {
                                     {item.submenu && (
                                         <span className="text-[8px] transition-transform duration-300 group-hover:rotate-180">▼</span>
                                     )}
-                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-[#93c01f] rounded-full transition-all duration-300 group-hover:w-4"></span>
+                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-[#93c01f] rounded-full transition-all duration-300 group-hover:w-4" />
                                 </a>
 
                                 {item.submenu && (
@@ -54,6 +60,7 @@ const NavbarPro = () => {
                     </div>
                 </div>
 
+                {/* Derecha */}
                 <div className="flex items-center gap-3">
                     <a
                         href="https://wa.me/51951072293"
@@ -69,18 +76,91 @@ const NavbarPro = () => {
                     </button>
 
                     <button
-                        className="relative group px-7 py-2.5 rounded-2xl overflow-hidden transition-all duration-300 active:scale-95"
-                        style={{ background: '#93c01f', boxShadow: '0 10px_25px_rgba(147,192,31,0.3)' }}
+                        className="hidden sm:block relative group px-7 py-2.5 rounded-2xl overflow-hidden transition-all duration-300 active:scale-95"
+                        style={{ background: '#93c01f' }}
                         onClick={handleSolicitarAhora}
                     >
                         <span className="relative z-10 text-[10px] font-bold uppercase tracking-[0.15em] text-[#152036] flex items-center gap-2">
                             Solicitar Ahora
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#152036]/40 animate-pulse"></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#152036]/40 animate-pulse" />
                         </span>
-                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    </button>
+
+                    {/* Hamburguesa - solo mobile */}
+                    <button
+                        className="md:hidden flex flex-col justify-center items-center gap-[5px] w-9 h-9 rounded-xl hover:bg-white/10 transition-colors duration-200 p-2"
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        aria-label="Menú"
+                    >
+                        <span className={`block w-5 h-[2px] bg-white rounded-full transition-all duration-300 ${mobileOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+                        <span className={`block w-5 h-[2px] bg-white rounded-full transition-all duration-300 ${mobileOpen ? 'opacity-0' : ''}`} />
+                        <span className={`block w-5 h-[2px] bg-white rounded-full transition-all duration-300 ${mobileOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
                     </button>
                 </div>
+
+                {/* Drawer Mobile */}
+                <div className={`md:hidden absolute top-[calc(100%+12px)] left-0 right-0 bg-[#152036] border border-white/10 rounded-3xl shadow-[0_20px_40px_rgba(21,32,54,0.5)] overflow-hidden transition-all duration-300 z-50 ${mobileOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-3 pointer-events-none'}`}>
+                    <div className="p-4 flex flex-col">
+                        {menuItems.map((item) => (
+                            <div key={item.name}>
+                                <button
+                                    className="w-full text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white hover:text-[#93c01f] hover:bg-white/5 rounded-xl transition-all duration-200 flex justify-between items-center"
+                                    onClick={() => {
+                                        if (item.submenu) {
+                                            setOpenSubmenu(openSubmenu === item.name ? null : item.name);
+                                        } else {
+                                            setMobileOpen(false);
+                                        }
+                                    }}
+                                >
+                                    <a href={item.href || "#"}>{item.name}</a>
+                                    {item.submenu && (
+                                        <span className={`text-[8px] transition-transform duration-300 ${openSubmenu === item.name ? 'rotate-180' : ''}`}>▼</span>
+                                    )}
+                                </button>
+
+                                {item.submenu && openSubmenu === item.name && (
+                                    <div className="ml-4 mb-1 flex flex-col">
+                                        {item.submenu.map((sub) => (
+                                            <a
+                                                key={sub.name}
+                                                href={sub.href}
+                                                className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white/60 hover:text-[#93c01f] hover:bg-white/5 rounded-xl transition-colors"
+                                                onClick={() => setMobileOpen(false)}
+                                            >
+                                                {sub.name}
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        <div className="h-px bg-white/10 my-3" />
+
+                        <button className="px-4 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white/50 hover:text-[#93c01f] transition-colors text-left rounded-xl hover:bg-white/5">
+                            Iniciar Sesión
+                        </button>
+
+                        <button
+                            className="mt-2 w-full py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] text-[#152036] transition-all duration-300 active:scale-95"
+                            style={{ background: '#93c01f' }}
+                            onClick={handleSolicitarAhora}
+                        >
+                            Solicitar Ahora
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {/* Overlay para cerrar el drawer */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
         </nav>
     );
 };

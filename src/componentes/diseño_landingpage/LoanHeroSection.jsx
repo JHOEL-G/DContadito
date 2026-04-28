@@ -27,9 +27,9 @@ const LoanHeroUltra = () => {
 
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=700&q=80"
+                            src="DISEÑO-DE-SITIO-WEB-2PROP.01.jpg.jpeg"
                             alt=""
-                            className="w-full h-full object-cover object-center opacity-40 mix-blend-luminosity"
+                            className="w-full h-full object-cover object-top opacity-60 mix-blend-luminosity"
                         />
                     </div>
 
@@ -57,8 +57,12 @@ const LoanHeroUltra = () => {
 
                         <div className="w-full lg:w-[50%] flex flex-col items-center lg:items-end lg:pr-30 gap-4">
 
-                            <div className="bg-white rounded-[2rem] p-10 w-full max-w-[480px]"
-                                style={{ border: '4px solid #152036', boxShadow: '0 25px 60px rgba(21,32,54,0.4), 0 0 0 1px rgba(21,32,54,0.1)' }}>
+                            <div className="bg-white w-full max-w-[500px] p-10 flex flex-col justify-between"
+                                style={{
+                                    border: '10px solid #152036',
+                                    borderRadius: '3.5rem',
+                                    minHeight: '650px',
+                                }}>
 
                                 <p className="text-center text-xs font-black uppercase tracking-[0.3em] text-gray-500 mb-1">
                                     SELECCIONA TU PODER
