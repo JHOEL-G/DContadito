@@ -127,7 +127,7 @@ const Calculadora = ({ monto, setMonto, quincenas, setQuincenas, pagoQuincenal, 
                         </div>
                     </div>
 
-                    <div className="hidden lg:block lg:w-1/3 relative -ml-6 mt-10">
+                    <div className="hidden lg:block lg:w-1/3 relative ml-6 mt-10">
                         <img
                             src="/DISEÑO-DE-SITIO-WEB-2PROP.03.jpg.jpeg"
                             alt="Cliente"
