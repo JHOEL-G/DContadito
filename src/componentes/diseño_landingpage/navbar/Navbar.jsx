@@ -14,16 +14,14 @@ const NavbarPro = () => {
     };
 
     return (
-        <nav className="fixed top-0 w-full z-50 py-4 px-4">
-            <div className="max-w-[95%] mx-auto px-6 py-2.5 flex justify-between items-center bg-[#152036] backdrop-blur-xl border border-white/10 rounded-[2.5rem] shadow-[0_10px_30px_rgba(21,32,54,0.3)] relative">
+        <nav className="fixed top-0 w-full z-50 py-2 px-3 sm:py-4 sm:px-4">
+            <div className="max-w-[95%] mx-auto px-4 py-2 sm:px-6 sm:py-2.5 flex justify-between items-center bg-[#152036] backdrop-blur-xl border border-white/10 rounded-[2.5rem] shadow-[0_10px_30px_rgba(21,32,54,0.3)] relative">
 
-                {/* Logo + Menu Desktop */}
                 <div className="flex items-center gap-10">
                     <div className="flex items-center gap-3 cursor-pointer">
-                        <img src="LOGOB.png" alt="logo dcontadito" className="w-32 h-auto" />
+                        <img src="LOGOB.png" alt="logo dcontadito" className="w-24 sm:w-32 h-auto" />
                     </div>
 
-                    {/* Nav links - solo desktop */}
                     <div className="hidden md:flex items-center gap-1">
                         {menuItems.map((item) => (
                             <div key={item.name} className="relative group">
@@ -60,7 +58,6 @@ const NavbarPro = () => {
                     </div>
                 </div>
 
-                {/* Derecha */}
                 <div className="flex items-center gap-3">
                     <a
                         href="https://wa.me/51951072293"
@@ -87,7 +84,6 @@ const NavbarPro = () => {
                         <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                     </button>
 
-                    {/* Hamburguesa - solo mobile */}
                     <button
                         className="md:hidden flex flex-col justify-center items-center gap-[5px] w-9 h-9 rounded-xl hover:bg-white/10 transition-colors duration-200 p-2"
                         onClick={() => setMobileOpen(!mobileOpen)}
@@ -99,7 +95,6 @@ const NavbarPro = () => {
                     </button>
                 </div>
 
-                {/* Drawer Mobile */}
                 <div className={`md:hidden absolute top-[calc(100%+12px)] left-0 right-0 bg-[#152036] border border-white/10 rounded-3xl shadow-[0_20px_40px_rgba(21,32,54,0.5)] overflow-hidden transition-all duration-300 z-50 ${mobileOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-3 pointer-events-none'}`}>
                     <div className="p-4 flex flex-col">
                         {menuItems.map((item) => (
@@ -154,7 +149,6 @@ const NavbarPro = () => {
                 </div>
             </div>
 
-            {/* Overlay para cerrar el drawer */}
             {mobileOpen && (
                 <div
                     className="fixed inset-0 z-40"

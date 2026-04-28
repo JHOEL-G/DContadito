@@ -37,16 +37,17 @@ const LandingPage = () => {
 
     return (
         <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-100 selection:text-blue-800"
-            style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            style={{ paddingTop: '0' }}>
 
             <NavbarPro />
+
             <LoanHeroUltra />
 
             <div className="flex justify-center w-full mb-4">
                 <div className="w-[98%] max-w-[95%] h-[6px] bg-[#152036]"></div>
             </div>
 
-            <div className="bg-[#152036] rounded-br-[2rem] rounded-b-[2rem] px-8 py-6 flex justify-around items-center max-w-[95%] mx-auto border border-[#152036]/50 mb-10">
+            <div className="bg-[#152036] rounded-br-[2rem] rounded-b-[2rem] px-4 sm:px-8 py-4 sm:py-6 grid grid-cols-2 sm:flex sm:justify-around items-center max-w-[95%] mx-auto border border-[#152036]/50 mb-10 gap-4 sm:gap-0">
                 {[
                     { num: '24H', label: 'CRÉDITO AUTORIZADO' },
                     { num: '$6K-$20K', label: 'RANGO DE CRÉDITO' },
@@ -54,18 +55,18 @@ const LandingPage = () => {
                     { num: '100%', label: 'ATENCIÓN PERSONALIZADA' },
                 ].map((s, i) => (
                     <div key={s.label} className="flex items-center">
-                        <div className="text-center">
-                            <div className="text-4xl font-black uppercase tracking-wide leading-none"
+                        <div className="text-center w-full">
+                            <div className="text-2xl sm:text-4xl font-black uppercase tracking-wide leading-none"
                                 style={{ color: '#93c01f' }}>
                                 {s.num}
                             </div>
-                            <div className="text-[0.6rem] font-bold uppercase tracking-widest mt-1.5"
+                            <div className="text-[0.5rem] sm:text-[0.6rem] font-bold uppercase tracking-widest mt-1.5"
                                 style={{ color: '#93c01f99' }}>
                                 {s.label}
                             </div>
                         </div>
                         {i < 3 && (
-                            <div className="w-px h-10 ml-8" style={{ background: '#93c01f30' }} />
+                            <div className="hidden sm:block w-px h-10 ml-8" style={{ background: '#93c01f30' }} />
                         )}
                     </div>
                 ))}

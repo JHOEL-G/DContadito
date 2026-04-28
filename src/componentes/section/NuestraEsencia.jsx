@@ -8,7 +8,6 @@ const NuestraEsencia = () => {
 
             <div className="max-w-6xl mx-auto px-6 relative z-10 text-center">
 
-                {/* Etiqueta */}
                 <div className="mb-5">
                     <span className="inline-block px-8 py-2 rounded-full text-white text-[11px] font-black uppercase tracking-[0.25em]"
                         style={{ background: '#93c01f' }}>
@@ -16,7 +15,6 @@ const NuestraEsencia = () => {
                     </span>
                 </div>
 
-                {/* Título */}
                 <div className="mb-20">
                     <h2 className="font-light uppercase tracking-tight leading-none"
                         style={{ color: '#152036', fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
@@ -29,10 +27,8 @@ const NuestraEsencia = () => {
                     <div className="w-16 h-1 mx-auto mt-4 rounded-full" style={{ background: '#93c01f' }} />
                 </div>
 
-                {/* Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 rounded-[2rem] overflow-hidden shadow-[0_30px_80px_rgba(21,32,54,0.15)]">
 
-                    {/* Misión */}
                     <div className="p-12 flex flex-col items-center justify-start min-h-[420px] relative"
                         style={{ background: '#152036' }}>
                         <div className="w-12 h-1 rounded-full mb-6" style={{ background: '#93c01f' }} />
@@ -46,7 +42,6 @@ const NuestraEsencia = () => {
                         </p>
                     </div>
 
-                    {/* Visión — card central destacado */}
                     <div className="p-12 flex flex-col items-center justify-start min-h-[420px] relative scale-[1.02] z-10 shadow-[0_0_60px_rgba(147,192,31,0.3)]"
                         style={{ background: '#93c01f' }}>
                         <div className="w-12 h-1 rounded-full mb-6 bg-white/40" />
@@ -60,7 +55,6 @@ const NuestraEsencia = () => {
                         </p>
                     </div>
 
-                    {/* Valores */}
                     <div className="p-12 flex flex-col items-center justify-start min-h-[420px]"
                         style={{ background: '#152036' }}>
                         <div className="w-12 h-1 rounded-full mb-6" style={{ background: '#93c01f' }} />
