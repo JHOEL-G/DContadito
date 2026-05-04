@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { COLONIAS_MOCK, ESTADOS_MX } from './item/SolicitudItem';
 import { Field, inputStyle, RadioGroup, calcularCurp } from './hooks/SolicitudHooks';
 import { useNavigate } from 'react-router-dom';
+import { parsearCurp } from './hooks/parsearCurp';
 
 const SolicitudCredito = ({ onClose }) => {
     const [step, setStep] = useState(1);
-
+    const [curpManual, setCurpManual] = useState('');
+    const [curpModo, setCurpModo] = useState('auto');
     const [nombre, setNombre] = useState('');
     const [estadoNac, setEstadoNac] = useState('');
     const [fechaNac, setFechaNac] = useState('');
@@ -31,17 +33,46 @@ const SolicitudCredito = ({ onClose }) => {
     const [ingresos, setIngresos] = useState('');
     const [comprobacion, setComprobacion] = useState('');
     const navigate = useNavigate();
+    const [cpCargando, setCpCargando] = useState(false);
+    const [enviado, setEnviado] = useState(false);
 
     const curp = calcularCurp(nombre, estadoNac, fechaNac, genero);
 
     useEffect(() => {
         if (cp.length === 5) {
-            const cols = COLONIAS_MOCK[cp] || [];
-            setColonias(cols);
-            setColonia(cols[0] || '');
+            setCpCargando(true);
+            fetch(`https://api.zippopotam.us/MX/${cp}`)
+                .then(r => {
+                    if (!r.ok) throw new Error('CP no encontrado');
+                    return r.json();
+                })
+                .then(data => {
+                    setCpCargando(false);
+                    if (!data.places || data.places.length === 0) return;
+                    const coloniasList = data.places.map(p => p['place name']);
+                    setColonias(coloniasList);
+                    setColonia(coloniasList[0] || '');
+                    const lugar = data.places[0];
+                    if (lugar) {
+                        setMunicipio(lugar['place name']);
+                        const estadoApi = lugar['state'];
+                        const match = ESTADOS_MX.find(e =>
+                            e.toLowerCase().includes(estadoApi.toLowerCase()) ||
+                            estadoApi.toLowerCase().includes(e.toLowerCase())
+                        );
+                        if (match) setEstadoDom(match);
+                    }
+                })
+                .catch(() => {
+                    setCpCargando(false);
+                    setColonias([]);
+                    setColonia('');
+                });
         } else {
             setColonias([]);
             setColonia('');
+            setMunicipio('');
+            setEstadoDom('');
         }
     }, [cp]);
 
@@ -160,6 +191,47 @@ const SolicitudCredito = ({ onClose }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                             <div className="md:col-span-2 space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">CURP</label>
+
+                                {/* Toggle modo */}
+                                <div className="flex gap-2 mb-2">
+                                    {[{ v: 'auto', l: 'Auto-generar' }, { v: 'manual', l: 'Ingresar manualmente' }].map(opt => (
+                                        <button
+                                            key={opt.v}
+                                            onClick={() => { setCurpModo(opt.v); setCurpManual(''); }}
+                                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${curpModo === opt.v
+                                                ? 'bg-blue-600 text-white border-blue-600'
+                                                : 'bg-gray-50 text-gray-400 border-gray-100'
+                                                }`}
+                                        >
+                                            {opt.l}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {curpModo === 'auto' ? (
+                                    <div className={`w-full rounded-2xl px-6 py-5 text-center font-mono text-lg tracking-[0.2em] transition-all border ${curp
+                                        ? 'bg-blue-50 border-blue-100 text-blue-700 font-bold'
+                                        : 'bg-gray-50 border-dashed border-gray-200 text-gray-300 text-xs font-sans tracking-normal'
+                                        }`}>
+                                        {curp || 'Completa nombre, estado, fecha y género...'}
+                                    </div>
+                                ) : (
+                                    <input
+                                        className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 font-mono text-lg tracking-[0.2em] text-blue-700 uppercase placeholder:text-gray-300 focus:bg-white focus:border-blue-600 transition-all outline-none"
+                                        value={curpManual}
+                                        maxLength={18}
+                                        onChange={e => {
+                                            const val = e.target.value.toUpperCase();
+                                            setCurpManual(val);
+                                            parsearCurp(val, setGenero, setFechaNac, setEstadoNac, setNombre);
+                                        }}
+                                        placeholder="CURP de 18 caracteres"
+                                    />
+                                )}
+                            </div>
+
+                            <div className="md:col-span-2 space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Nombre completo</label>
                                 <input
                                     className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 placeholder:text-gray-300 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all outline-none"
@@ -206,16 +278,6 @@ const SolicitudCredito = ({ onClose }) => {
                                             {opt.l}
                                         </button>
                                     ))}
-                                </div>
-                            </div>
-
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">CURP (Auto-generado)</label>
-                                <div className={`w-full rounded-2xl px-6 py-5 text-center font-mono text-lg tracking-[0.2em] transition-all border ${curp
-                                    ? 'bg-blue-50 border-blue-100 text-blue-700 font-bold'
-                                    : 'bg-gray-50 border-dashed border-gray-200 text-gray-300 text-xs font-sans tracking-normal'
-                                    }`}>
-                                    {curp || 'Esperando datos para generar...'}
                                 </div>
                             </div>
 
@@ -327,7 +389,7 @@ const SolicitudCredito = ({ onClose }) => {
                                     </select>
                                 ) : (
                                     <div className="w-full bg-gray-50 border border-dashed border-gray-200 rounded-2xl px-6 py-4 text-xs font-medium text-gray-400 italic">
-                                        {cp.length === 5 ? 'Buscando colonias...' : 'Ingresa CP primero'}
+                                        {cpCargando ? '🔍 Buscando...' : cp.length === 5 ? 'CP no encontrado' : 'Ingresa CP primero'}
                                     </div>
                                 )}
                             </div>
@@ -473,6 +535,16 @@ const SolicitudCredito = ({ onClose }) => {
                                 />
                             </div>
 
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Antigüedad del negocio</label>
+                                <input
+                                    className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 placeholder:text-gray-300 focus:bg-white focus:border-green-500 transition-all outline-none"
+                                    value={antiguedad}
+                                    onChange={e => setAntiguedad(e.target.value)}
+                                    placeholder="¿Cuánto tiempo tiene tu negocio?"
+                                />
+                            </div>
+
                             <div className="md:col-span-2 space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Ingresos mensuales aproximados</label>
                                 <div className="relative">
@@ -507,6 +579,33 @@ const SolicitudCredito = ({ onClose }) => {
                             </div>
                         </div>
 
+                        {/* Modal de confirmación */}
+                        {enviado && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                                <div className="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] flex flex-col items-center gap-5 text-center">
+                                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-xl shadow-green-200">
+                                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <h4 className="text-2xl font-black tracking-tighter text-gray-900 uppercase italic leading-none">
+                                        🎉 ¡Felicidades!
+                                    </h4>
+                                    <p className="text-sm font-bold text-gray-500 leading-relaxed">
+                                        Tu solicitud está en proceso. Un ejecutivo de{' '}
+                                        <span className="text-green-700 font-black">Dcontadito</span>{' '}
+                                        te contactará en breve para dar continuidad a tu trámite.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate('/')}
+                                        className="mt-2 w-full px-8 py-4 bg-green-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all"
+                                    >
+                                        Ir al inicio →
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="mt-12 pt-8 border-t border-gray-50 flex flex-col sm:flex-row gap-4 justify-between items-center">
                             <button
                                 onClick={() => setStep(2)}
@@ -515,7 +614,7 @@ const SolicitudCredito = ({ onClose }) => {
                                 ← Revisar datos
                             </button>
                             <button
-                                onClick={() => { alert('¡Solicitud enviada!'); navigate('/'); }}
+                                onClick={() => setEnviado(true)}
                                 className="w-full sm:w-auto bg-green-600 text-white px-12 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all hover:shadow-[0_20px_40px_-10px_rgba(22,163,74,0.4)] flex items-center justify-center gap-3"
                             >
                                 Finalizar Solicitud

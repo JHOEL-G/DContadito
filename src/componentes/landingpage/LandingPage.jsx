@@ -93,7 +93,6 @@ const LandingPage = () => {
                 setQuincenas={setQuincenas}
                 pagoQuincenal={pagoQuincenal}
                 totalPagar={totalPagar}
-                intereses={intereses}
                 fmt={fmt}
                 handleSolicitar={handleSolicitar}
             />

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LoanHeroUltra = () => {
-    const [amount, setAmount] = useState(70000);
-    const maxLoan = 70000;
+    const [amount, setAmount] = useState(6000);
+    const maxLoan = 20000;
     const estimatedPayment = (amount * 0.1135).toFixed(2);
     const navigate = useNavigate();
 
@@ -81,47 +81,50 @@ const LoanHeroUltra = () => {
                                     {formatter.format(amount)}
                                 </h2>
 
-                                <div className="relative mb-2 px-1">
+                                <div className="relative mb-2 px-1 h-6 flex items-center">
                                     <input
                                         type="range"
-                                        min="1000"
+                                        min="6000"
                                         max={maxLoan}
                                         step="1000"
                                         value={amount}
                                         onChange={(e) => setAmount(parseInt(e.target.value))}
-                                        className="w-full cursor-pointer"
+                                        className="absolute w-full cursor-pointer z-20
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:w-0
+            [&::-webkit-slider-thumb]:h-0
+            [&::-moz-range-thumb]:w-0
+            [&::-moz-range-thumb]:h-0
+            [&::-moz-range-thumb]:border-0
+            [&::-moz-range-thumb]:bg-transparent"
                                         style={{
                                             WebkitAppearance: 'none',
+                                            appearance: 'none',
                                             height: '4px',
                                             borderRadius: '2px',
-                                            background: `linear-gradient(to right, #152036 ${(amount / maxLoan) * 100}%, #ddd ${(amount / maxLoan) * 100}%)`,
+                                            background: `linear-gradient(to right, #152036 ${((amount - 6000) / (maxLoan - 6000)) * 100}%, #ddd ${((amount - 6000) / (maxLoan - 6000)) * 100}%)`,
                                             outline: 'none',
                                         }}
                                     />
-                                    <style>{`
-                                        input[type=range]::-webkit-slider-thumb {
-                                            -webkit-appearance: none;
-                                            width: 18px;
-                                            height: 18px;
-                                            border-radius: 50%;
-                                            background: #152036;
-                                            cursor: pointer;
-                                        }
-                                    `}</style>
-                                    <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase mt-1">
-                                        <span>BASE</span>
-                                        <span>ELITE LEVEL</span>
-                                    </div>
+                                    {/* Rombo */}
+                                    <div
+                                        className="absolute w-5 h-5 bg-[#152036] rotate-45 pointer-events-none shadow-md z-10"
+                                        style={{
+                                            left: `calc(${((amount - 6000) / (maxLoan - 6000)) * 100}% - 10px)`,
+                                            top: '50%',
+                                            marginTop: '-10px'
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase mt-1">
+                                    <span>BASE</span>
+                                    <span>ELITE LEVEL</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2 sm:gap-3 my-4 sm:my-5">
+                                <div className="grid grid-cols-1 gap-2 sm:gap-3 my-4 sm:my-5">
                                     <div className="rounded-xl p-3 sm:p-4 text-center" style={{ background: '#152036' }}>
                                         <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-1">PAGO QUINCENAL</p>
                                         <p className="text-base sm:text-xl font-black text-white">${estimatedPayment}</p>
-                                    </div>
-                                    <div className="rounded-xl p-3 sm:p-4 text-center" style={{ background: '#152036' }}>
-                                        <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-1">TASA ÉLITE</p>
-                                        <p className="text-base sm:text-xl font-black" style={{ color: '#93c01f' }}>11.35%</p>
                                     </div>
                                 </div>
 

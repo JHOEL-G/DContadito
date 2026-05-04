@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Calculadora = ({ monto, setMonto, quincenas, setQuincenas, pagoQuincenal, totalPagar, intereses, fmt, handleSolicitar }) => {
+const Calculadora = ({ monto, setMonto, quincenas, setQuincenas, pagoQuincenal, totalPagar, fmt, handleSolicitar }) => {
 
     const getPercent = (value, min, max) => ((value - min) / (max - min)) * 100;
 
@@ -34,9 +34,11 @@ const Calculadora = ({ monto, setMonto, quincenas, setQuincenas, pagoQuincenal, 
                                 </div>
                                 <div className="relative h-6 flex items-center">
                                     <style>{`
-                                        input[type=range]::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; cursor: pointer; }
-                                        input[type=range]::-moz-range-thumb { width: 24px; height: 24px; cursor: pointer; border: none; background: transparent; }
-                                    `}</style>
+    input[type=range] { -webkit-appearance: none; appearance: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 0; height: 0; background: transparent; }
+    input[type=range]::-moz-range-thumb { width: 0; height: 0; background: transparent; border: none; }
+    input[type=range]::-ms-thumb { width: 0; height: 0; background: transparent; }
+`}</style>
                                     <div className="absolute w-full h-[3px] bg-[#1d2d5b] rounded-full opacity-30"></div>
                                     <input
                                         type="range"
@@ -45,7 +47,14 @@ const Calculadora = ({ monto, setMonto, quincenas, setQuincenas, pagoQuincenal, 
                                         step="1000"
                                         value={monto}
                                         onChange={(e) => setMonto(Number(e.target.value))}
-                                        className="absolute w-full bg-transparent appearance-none cursor-pointer z-20"
+                                        className="absolute w-full bg-transparent appearance-none cursor-pointer z-20
+        [&::-webkit-slider-thumb]:appearance-none
+        [&::-webkit-slider-thumb]:w-0
+        [&::-webkit-slider-thumb]:h-0
+        [&::-moz-range-thumb]:w-0
+        [&::-moz-range-thumb]:h-0
+        [&::-moz-range-thumb]:border-0
+        [&::-moz-range-thumb]:bg-transparent"
                                     />
                                     <div
                                         className="absolute w-5 h-5 bg-[#1d2d5b] rotate-45 pointer-events-none transition-all duration-75 ease-out shadow-lg border-2 border-[#8cc63f]/20"
@@ -74,33 +83,35 @@ const Calculadora = ({ monto, setMonto, quincenas, setQuincenas, pagoQuincenal, 
                                     <input
                                         type="range"
                                         min="6"
-                                        max="24"
+                                        max="12"
                                         step="1"
                                         value={quincenas}
                                         onChange={(e) => setQuincenas(Number(e.target.value))}
-                                        className="absolute w-full bg-transparent appearance-none cursor-pointer z-20"
+                                        className="absolute w-full bg-transparent appearance-none cursor-pointer z-20
+        [&::-webkit-slider-thumb]:appearance-none
+        [&::-webkit-slider-thumb]:w-0
+        [&::-webkit-slider-thumb]:h-0
+        [&::-moz-range-thumb]:w-0
+        [&::-moz-range-thumb]:h-0
+        [&::-moz-range-thumb]:border-0
+        [&::-moz-range-thumb]:bg-transparent"
                                     />
                                     <div
-                                        className="absolute w-5 h-5 bg-[#1d2d5b] rotate-45 pointer-events-none transition-all duration-75 ease-out shadow-lg border-2 border-[#8cc63f]/20"
-                                        style={{
-                                            left: `calc(${getPercent(quincenas, 6, 24)}% - 10px)`,
-                                            top: '50%',
-                                            marginTop: '-10px'
-                                        }}
-                                    ></div>
+                                        className="absolute w-5 h-5 bg-[#1d2d5b] rotate-45 pointer-events-none shadow-lg"
+                                        style={{ left: `calc(${getPercent(quincenas, 6, 12)}% - 10px)`, top: '50%', marginTop: '-10px' }}
+                                    />
                                 </div>
                                 <div className="flex justify-between text-[10px] font-bold text-[#1d2d5b] uppercase opacity-70">
                                     <span>6 Quincenas</span>
-                                    <span>24 Quincenas</span>
+                                    <span>12 Quincenas</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-8 sm:mb-12">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-8 sm:mb-12">
                             {[
                                 { val: fmt(pagoQuincenal), label: 'Pago quincenal', color: 'text-[#3fb4e9]' },
                                 { val: fmt(totalPagar), label: 'Total a pagar', color: 'text-[#3fb4e9]' },
-                                { val: fmt(intereses), label: 'Intereses totales', color: 'text-red-600' },
                             ].map((r) => (
                                 <div key={r.label} className="bg-white rounded-[1.2rem] sm:rounded-[1.5rem] p-5 sm:p-8 text-center shadow-sm hover:shadow-md transition-shadow">
                                     <span className={`block text-2xl sm:text-4xl font-black tracking-tighter ${r.color} mb-1`}>
