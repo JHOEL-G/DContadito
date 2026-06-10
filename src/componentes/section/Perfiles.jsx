@@ -63,10 +63,10 @@ const Perfiles = () => {
                 </div>
 
                 <div className="flex flex-col sm:hidden gap-8">
-                    {perfiles.map((p) => (
-                        <div key={p.titulo1} className="flex flex-col items-center text-center">
+                    {perfiles.map((p, index) => (
+                        <div key={index} className="flex flex-col items-center text-center">
                             <div className="w-32 h-32 rounded-[2rem] flex items-center justify-center mb-4 shadow-lg"
-                                style={{ background: '#29b6d8' }}>
+                                 style={{ background: '#29b6d8' }}>
                                 {React.cloneElement(p.icon, { size: 52 })}
                             </div>
                             <h3 className="text-xl font-black uppercase leading-tight mb-2"

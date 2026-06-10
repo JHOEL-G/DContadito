@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { COLONIAS_MOCK, ESTADOS_MX } from './item/SolicitudItem';
-import { Field, inputStyle, RadioGroup, calcularCurp } from './hooks/SolicitudHooks';
+import { Field, RadioGroup, calcularCurp } from './hooks/SolicitudHooks';
 import { useNavigate } from 'react-router-dom';
 import { parsearCurp } from './hooks/parsearCurp';
+
+const CIUDADES_PRESENCIA = [
+    { estado: 'Jalisco', ciudades: ['Guadalajara', 'Zapopan', 'Tlaquepaque', 'Tonalá'] },
+    { estado: 'Ciudad de México', ciudades: ['Iztapalapa', 'Gustavo A. Madero', 'Álvaro Obregón', 'Coyoacán'] },
+    { estado: 'Estado de México', ciudades: ['Ecatepec', 'Nezahualcóyotl', 'Naucalpan', 'Toluca'] },
+    { estado: 'Puebla', ciudades: ['Puebla', 'Tehuacán', 'San Martín Texmelucan'] },
+    { estado: 'Veracruz', ciudades: ['Veracruz', 'Xalapa', 'Coatzacoalcos', 'Orizaba'] },
+    { estado: 'Guanajuato', ciudades: ['León', 'Irapuato', 'Celaya', 'Salamanca'] },
+];
 
 const SolicitudCredito = ({ onClose }) => {
     const [step, setStep] = useState(1);
@@ -26,17 +35,16 @@ const SolicitudCredito = ({ onClose }) => {
 
     const [estadoCivil, setEstadoCivil] = useState('');
     const [dependientes, setDependientes] = useState('');
-    const [perfil, setPerfil] = useState('');
-    const [giroNegocio, setGiroNegocio] = useState('');
-    const [empresa, setEmpresa] = useState('');
-    const [antiguedad, setAntiguedad] = useState('');
-    const [ingresos, setIngresos] = useState('');
-    const [comprobacion, setComprobacion] = useState('');
+    const [perfiles, setPerfiles] = useState([{ perfil: '', giroNegocio: '', empresa: '', antiguedad: '', ingresos: '', otrosIngresos: '', comprobacion: '' }]);
     const navigate = useNavigate();
     const [cpCargando, setCpCargando] = useState(false);
     const [enviado, setEnviado] = useState(false);
-
     const curp = calcularCurp(nombre, estadoNac, fechaNac, genero);
+    const [ineFrontal, setIneFrontal] = useState(null);
+    const [ineTraser, setIneTraser] = useState(null);
+    const [geoError, setGeoError] = useState('');
+    const [geoCargando, setGeoCargando] = useState(false);
+    const [ciudadesVisible, setCiudadesVisible] = useState(false);
 
     useEffect(() => {
         if (cp.length === 5) {
@@ -82,30 +90,46 @@ const SolicitudCredito = ({ onClose }) => {
         { n: 3, label: 'Económicos' },
     ];
 
-    const progress = (step / 3) * 100;
-
     const containerStyle = {
         background: 'white', fontFamily: "'DM Sans', sans-serif", minHeight: '100vh',
     };
 
-    const headerStyle = {
-        background: '#111827', padding: '1rem 1.5rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    const obtenerUbicacion = () => {
+        if (!navigator.geolocation) {
+            setGeoError('Tu navegador no soporta geolocalización');
+            return;
+        }
+        setGeoCargando(true);
+        setGeoError('');
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                try {
+                    const { latitude, longitude } = pos.coords;
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`);
+                    const data = await res.json();
+                    const addr = data.address;
+                    const estadoApi = addr.state || '';
+                    const match = ESTADOS_MX.find(e =>
+                        e.toLowerCase().includes(estadoApi.toLowerCase()) ||
+                        estadoApi.toLowerCase().includes(e.toLowerCase())
+                    );
+                    if (match) setEstadoDom(match);
+                    setMunicipio(addr.city || addr.town || addr.municipality || addr.county || '');
+                    if (addr.postcode) setCp(addr.postcode.slice(0, 5));
+                } catch {
+                    setGeoError('No se pudo obtener la ubicación');
+                }
+                setGeoCargando(false);
+            },
+            () => {
+                setGeoError('Permiso denegado. Activa la ubicación en tu navegador');
+                setGeoCargando(false);
+            }
+        );
     };
 
-    const cardStyle = {
-        background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '1rem',
-        padding: '1.75rem', maxWidth: '720px', margin: '0 auto',
-    };
-
-    const gridStyle = {
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem',
-    };
-
-    const sectionHeadStyle = {
-        fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase',
-        letterSpacing: '0.12em', color: '#6b7280', marginBottom: '1.25rem',
-        paddingBottom: '0.5rem', borderBottom: '1px solid #e5e7eb',
+    const actualizarPerfil = (index, campo, valor) => {
+        setPerfiles(prev => prev.map((p, i) => i === index ? { ...p, [campo]: valor } : p));
     };
 
     return (
@@ -238,6 +262,7 @@ const SolicitudCredito = ({ onClose }) => {
                                     value={nombre}
                                     onChange={e => setNombre(e.target.value)}
                                     placeholder="Como aparece en tu identificación oficial"
+                                    disabled={curpModo === 'manual' && curpManual.length === 18}
                                 />
                             </div>
 
@@ -247,6 +272,7 @@ const SolicitudCredito = ({ onClose }) => {
                                     className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 appearance-none focus:bg-white focus:border-blue-600 transition-all outline-none cursor-pointer"
                                     value={estadoNac}
                                     onChange={e => setEstadoNac(e.target.value)}
+                                    disabled={curpModo === 'manual' && curpManual.length === 18}
                                 >
                                     <option value="">Seleccionar estado</option>
                                     {ESTADOS_MX.map(e => <option key={e} value={e}>{e}</option>)}
@@ -260,6 +286,7 @@ const SolicitudCredito = ({ onClose }) => {
                                     className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:bg-white focus:border-blue-600 transition-all outline-none"
                                     value={fechaNac}
                                     onChange={e => setFechaNac(e.target.value)}
+                                    disabled={curpModo === 'manual' && curpManual.length === 18}
                                 />
                             </div>
 
@@ -270,6 +297,7 @@ const SolicitudCredito = ({ onClose }) => {
                                         <button
                                             key={opt.v}
                                             onClick={() => setGenero(opt.v)}
+                                            disabled={curpModo === 'manual' && curpManual.length === 18}
                                             className={`flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${genero === opt.v
                                                 ? 'bg-gray-900 text-white shadow-xl shadow-gray-200'
                                                 : 'bg-gray-50 text-gray-400 border border-gray-100 hover:bg-gray-100'
@@ -285,23 +313,80 @@ const SolicitudCredito = ({ onClose }) => {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Celular (10 dígitos)</label>
                                 <input
                                     type="tel"
-                                    className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:bg-white focus:border-blue-600 transition-all outline-none"
+                                    className={`w-full bg-gray-50/50 border rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:bg-white transition-all outline-none ${celular.length > 0 && celular.length !== 10 ? 'border-red-300 focus:border-red-500' : 'border-gray-100 focus:border-blue-600'}`}
                                     value={celular}
-                                    onChange={e => setCelular(e.target.value.replace(/\D/g, ''))}
+                                    onChange={e => setCelular(e.target.value.replace(/\D/g, '').slice(0, 10))}
                                     placeholder="55 0000 0000"
                                 />
+                                {celular.length > 0 && celular.length !== 10 && (
+                                    <p className="text-[10px] font-bold text-red-400 ml-4">Debe tener exactamente 10 dígitos</p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Correo electrónico</label>
                                 <input
                                     type="email"
-                                    className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:bg-white focus:border-blue-600 transition-all outline-none"
+                                    className={`w-full bg-gray-50/50 border rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:bg-white transition-all outline-none ${correo.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo) ? 'border-red-300 focus:border-red-500' : 'border-gray-100 focus:border-blue-600'}`}
                                     value={correo}
                                     onChange={e => setCorreo(e.target.value)}
                                     placeholder="tu@correo.com"
                                 />
+                                {correo.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo) && (
+                                    <p className="text-[10px] font-bold text-red-400 ml-4">Formato de correo inválido</p>
+                                )}
                             </div>
+
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">INE / Identificación oficial</label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                                    {/* FRONTAL */}
+                                    <label className={`flex items-center gap-4 border-2 border-dashed rounded-2xl px-6 py-5 cursor-pointer transition-all ${ineFrontal ? 'border-blue-300 bg-blue-50/40' : 'border-gray-200 bg-gray-50/50 hover:border-blue-300 hover:bg-blue-50/20'}`}>
+                                        <input type="file" accept="image/*,application/pdf" className="hidden" onChange={e => setIneFrontal(e.target.files[0] || null)} />
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${ineFrontal ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                                            <svg className={`w-5 h-5 ${ineFrontal ? 'text-white' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex flex-col">
+                <span className={`text-xs font-black uppercase tracking-widest ${ineFrontal ? 'text-blue-700' : 'text-gray-400'}`}>
+                    {ineFrontal ? ineFrontal.name : 'Lado frontal'}
+                </span>
+                                            <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">
+                    {ineFrontal ? 'Archivo listo ✓' : 'Frente de tu INE · JPG, PNG o PDF'}
+                </span>
+                                        </div>
+                                    </label>
+
+                                    {/* TRASERA */}
+                                    <label className={`flex items-center gap-4 border-2 border-dashed rounded-2xl px-6 py-5 cursor-pointer transition-all ${ineTraser ? 'border-blue-300 bg-blue-50/40' : 'border-gray-200 bg-gray-50/50 hover:border-blue-300 hover:bg-blue-50/20'}`}>
+                                        <input type="file" accept="image/*,application/pdf" className="hidden" onChange={e => setIneTraser(e.target.files[0] || null)} />
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${ineTraser ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                                            <svg className={`w-5 h-5 ${ineTraser ? 'text-white' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex flex-col">
+                <span className={`text-xs font-black uppercase tracking-widest ${ineTraser ? 'text-blue-700' : 'text-gray-400'}`}>
+                    {ineTraser ? ineTraser.name : 'Lado trasero'}
+                </span>
+                                            <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">
+                    {ineTraser ? 'Archivo listo ✓' : 'Vuelta de tu INE · JPG, PNG o PDF'}
+                </span>
+                                        </div>
+                                    </label>
+
+                                </div>
+
+                                {/* Indicador de progreso */}
+                                {(ineFrontal || ineTraser) && (
+                                    <p className={`text-[10px] font-bold ml-4 mt-1 ${ineFrontal && ineTraser ? 'text-blue-500' : 'text-amber-400'}`}>
+                                        {ineFrontal && ineTraser ? '✓ Ambos lados cargados' : `Falta: ${!ineFrontal ? 'lado frontal' : 'lado trasero'}`}
+                                    </p>
+                                )}
+                            </div>
+
                         </div>
 
                         <div className="mt-12 pt-8 border-t border-gray-50 flex justify-between items-center">
@@ -320,15 +405,85 @@ const SolicitudCredito = ({ onClose }) => {
                 {step === 2 && (
                     <div className="max-w-3xl mx-auto bg-white border border-gray-100 rounded-[2.5rem] p-8 md:p-12 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)]">
 
-                        <div className="mb-10 flex items-center gap-4">
-                            <div className="w-1.5 h-8 bg-blue-600 rounded-full"></div>
-                            <div>
-                                <h3 className="text-2xl font-black tracking-tighter text-gray-900 uppercase italic leading-none">
-                                    Ubicación <span className="text-blue-600">Actual.</span>
-                                </h3>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">
-                                    Detalles de tu domicilio vigente
-                                </p>
+                        <div className="mb-10 flex items-start justify-between gap-4 flex-wrap">
+                            <div className="flex items-center gap-4">
+                                <div className="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+                                <div>
+                                    <h3 className="text-2xl font-black tracking-tighter text-gray-900 uppercase italic leading-none">
+                                        Ubicación <span className="text-blue-600">Actual.</span>
+                                    </h3>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">
+                                        Detalles de tu domicilio vigente
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={obtenerUbicacion}
+                                disabled={geoCargando}
+                                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {geoCargando ? 'Detectando...' : 'Usar mi ubicación'}
+                            </button>
+                        </div>
+                        {geoError && (
+                            <p className="text-[10px] font-bold text-red-400 ml-4 -mt-4 mb-4">{geoError}</p>
+                        )}
+
+                        {/* Ciudades con presencia */}
+                        <div className="mb-8 border border-blue-100 rounded-2xl overflow-hidden">
+                            <button
+                                onClick={() => setCiudadesVisible(!ciudadesVisible)}
+                                className="w-full flex items-center justify-between px-5 py-4 bg-blue-50/50 hover:bg-blue-100/50 transition-all"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">Ciudades con presencia</p>
+                                </div>
+                                <svg
+                                    className={`w-4 h-4 text-blue-400 transition-transform duration-300 ${ciudadesVisible ? 'rotate-180' : ''}`}
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${ciudadesVisible ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                                <div className="p-5 flex flex-col gap-3 bg-white">
+                                    {CIUDADES_PRESENCIA.map(item => (
+                                        <div key={item.estado}>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">{item.estado}</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {item.ciudades.map(ciudad => (
+                                                    <button
+                                                        key={ciudad}
+                                                        onClick={() => {
+                                                            const match = ESTADOS_MX.find(e => e.toLowerCase().includes(item.estado.toLowerCase()) || item.estado.toLowerCase().includes(e.toLowerCase()));
+                                                            if (match) setEstadoDom(match);
+                                                            setMunicipio(ciudad);
+                                                            setCiudadesVisible(false);
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${municipio === ciudad ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'}`}
+                                                    >
+                                                        {ciudad}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() => { setEstadoDom(''); setMunicipio(''); setCiudadesVisible(false); }}
+                                        className="mt-2 text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors text-left"
+                                    >
+                                        No encuentro mi ciudad →
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -408,28 +563,6 @@ const SolicitudCredito = ({ onClose }) => {
                                     <option>Más de 5 años</option>
                                 </select>
                             </div>
-
-                            <div className="md:col-span-2 space-y-3">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Régimen de propiedad</label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                    {[
-                                        { value: 'propia', label: 'Propia' },
-                                        { value: 'rentada', label: 'Rentada' },
-                                        { value: 'familiar', label: 'Familiar' }
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.value}
-                                            onClick={() => setTipoVivienda(opt.value)}
-                                            className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${tipoVivienda === opt.value
-                                                ? 'bg-gray-900 text-white border-gray-900 shadow-xl'
-                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:border-gray-200'
-                                                }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
 
                         <div className="mt-12 pt-8 border-t border-gray-50 flex justify-between items-center">
@@ -483,6 +616,28 @@ const SolicitudCredito = ({ onClose }) => {
                                 </div>
                             </div>
 
+                            <div className="md:col-span-2 space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Régimen de propiedad</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {[
+                                        { value: 'propia', label: 'Propia' },
+                                        { value: 'rentada', label: 'Rentada' },
+                                        { value: 'familiar', label: 'Familiar' }
+                                    ].map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => setTipoVivienda(opt.value)}
+                                            className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${tipoVivienda === opt.value
+                                                ? 'bg-gray-900 text-white border-gray-900 shadow-xl'
+                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:border-gray-200'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Dependientes</label>
                                 <select
@@ -503,8 +658,8 @@ const SolicitudCredito = ({ onClose }) => {
                                     ].map((opt) => (
                                         <button
                                             key={opt.value}
-                                            onClick={() => setPerfil(opt.value)}
-                                            className={`py-4 px-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${perfil === opt.value
+                                            onClick={() => actualizarPerfil(0, 'perfil', opt.value)}
+                                            className={`py-4 px-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${perfiles[0]?.perfil === opt.value
                                                 ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200'
                                                 : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100'
                                                 }`}
@@ -519,7 +674,8 @@ const SolicitudCredito = ({ onClose }) => {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Giro del negocio</label>
                                 <select
                                     className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:bg-white focus:border-green-500 transition-all outline-none appearance-none cursor-pointer"
-                                    value={giroNegocio} onChange={e => setGiroNegocio(e.target.value)}
+                                    value={perfiles[0].giroNegocio}
+                                    onChange={e => actualizarPerfil(0, 'giroNegocio', e.target.value)}
                                 >
                                     <option value="">Seleccionar</option>
                                     {['Comercio', 'Alimentos', 'Estética', 'Abarrotes', 'Salud', 'Servicios'].map(g => <option key={g} value={g}>{g}</option>)}
@@ -530,19 +686,30 @@ const SolicitudCredito = ({ onClose }) => {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Nombre del negocio</label>
                                 <input
                                     className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 placeholder:text-gray-300 focus:bg-white focus:border-green-500 transition-all outline-none"
-                                    value={empresa} onChange={e => setEmpresa(e.target.value)}
+                                    value={perfiles[0].empresa}
+                                    onChange={e => actualizarPerfil(0, 'empresa', e.target.value)}
                                     placeholder="Nombre comercial"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Antigüedad del negocio</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Antigüedad del negocio <span className="text-blue-500 normal-case tracking-normal font-bold">(en meses)</span></label>
                                 <input
-                                    className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 placeholder:text-gray-300 focus:bg-white focus:border-green-500 transition-all outline-none"
-                                    value={antiguedad}
-                                    onChange={e => setAntiguedad(e.target.value)}
-                                    placeholder="¿Cuánto tiempo tiene tu negocio?"
+                                    className={`w-full bg-gray-50/50 border rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 placeholder:text-gray-300 focus:bg-white focus:border-green-500 transition-all outline-none ${perfiles[0].antiguedad && (isNaN(perfiles[0].antiguedad) || Number(perfiles[0].antiguedad) > 480 || Number(perfiles[0].antiguedad) < 0) ?  'border-red-300' : 'border-gray-100'}`}
+                                    value={perfiles[0].antiguedad}
+                                    onChange={e => actualizarPerfil(0, 'antiguedad', e.target.value.replace(/\D/g, ''))}
+                                    placeholder="Ej. 24 (máx. 480 meses = 40 años)"
+                                    maxLength={3}
                                 />
+                                {perfiles[0].antiguedad && (isNaN(perfiles[0].antiguedad) || Number(perfiles[0].antiguedad) > 480) && (
+                                    <p className="text-[10px] font-bold text-red-400 ml-4">Máximo 480 meses (40 años)</p>
+                                )}
+                                {perfiles[0].antiguedad && !isNaN(perfiles[0].antiguedad) && Number(perfiles[0].antiguedad) <= 480 && Number(perfiles[0].antiguedad) > 0 && (
+                                    <p className="text-[10px] font-bold text-blue-400 ml-4">
+                                        {Math.floor(Number(perfiles[0].antiguedad) / 12) > 0 ? `${Math.floor(Number(perfiles[0].antiguedad) / 12)} año(s) ` : ''}
+                                        {Number(perfiles[0].antiguedad) % 12 > 0 ? `${Number(perfiles[0].antiguedad) % 12} mes(es)` : ''}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="md:col-span-2 space-y-2">
@@ -550,11 +717,44 @@ const SolicitudCredito = ({ onClose }) => {
                                 <div className="relative">
                                     <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-black">$</span>
                                     <input
-                                        className="w-full bg-green-50/30 border border-green-100 rounded-2xl pl-10 pr-6 py-5 text-xl font-black text-green-700 placeholder:text-green-200 focus:bg-white focus:border-green-500 transition-all outline-none"
-                                        value={ingresos} onChange={e => setIngresos(e.target.value)}
-                                        placeholder="0.00"
+                                        className={`w-full bg-green-50/30 border rounded-2xl pl-10 pr-6 py-5 text-xl font-black text-green-700 placeholder:text-green-200 focus:bg-white focus:border-green-500 transition-all outline-none ${perfiles[0].ingresos && Number(perfiles[0].ingresos.replace(/,/g, '')) < 1000 ?  'border-red-300' : 'border-green-100'}`}
+                                        value={perfiles[0].ingresos}
+                                        onChange={e => {
+                                            const raw = e.target.value.replace(/[^\d]/g, '');
+                                            actualizarPerfil(0, 'ingresos', raw ? Number(raw).toLocaleString('es-MX') : '');
+                                        }}
+                                        placeholder="0"
                                     />
                                 </div>
+                                {perfiles[0].ingresos && Number(perfiles[0].ingresos.replace(/,/g, '')) < 1000 && (
+                                    <p className="text-[10px] font-bold text-red-400 ml-4">El monto mínimo es $1,000</p>
+                                )}
+                                {perfiles[0].ingresos && Number(perfiles[0].ingresos.replace(/,/g, '')) >= 1000 && (
+                                    <p className="text-[10px] font-bold text-green-500 ml-4">
+                                        $ {Number(perfiles[0].ingresos.replace(/,/g, '')).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Otros ingresos <span className="text-gray-300 normal-case tracking-normal font-bold">(opcional)</span></label>
+                                <div className="relative">
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-black">$</span>
+                                    <input
+                                        className="w-full bg-gray-50/30 border border-gray-100 rounded-2xl pl-10 pr-6 py-5 text-xl font-black text-gray-700 placeholder:text-gray-200 focus:bg-white focus:border-green-500 transition-all outline-none"
+                                        value={perfiles[0].otrosIngresos}
+                                        onChange={e => {
+                                            const raw = e.target.value.replace(/[^\d]/g, '');
+                                            actualizarPerfil(0, 'otrosIngresos', raw ? Number(raw).toLocaleString('es-MX') : '');
+                                        }}
+                                        placeholder="0"
+                                    />
+                                </div>
+                                {perfiles[0].otrosIngresos && Number(perfiles[0].otrosIngresos.replace(/,/g, '')) > 0 && (
+                                    <p className="text-[10px] font-bold text-gray-400 ml-4">
+                                        Ingreso total: $ {(Number(perfiles[0].ingresos.replace(/,/g, '') || 0) + Number(perfiles[0].otrosIngresos.replace(/,/g, ''))).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                                    </p>
+                                )}
                             </div>
 
                             <div className="md:col-span-2 space-y-3">
@@ -568,8 +768,8 @@ const SolicitudCredito = ({ onClose }) => {
                                     ].map(opt => (
                                         <button
                                             key={opt.v}
-                                            onClick={() => setComprobacion(opt.v)}
-                                            className={`py-3 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${comprobacion === opt.v ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-gray-50 text-gray-400 border-gray-100'
+                                            onClick={() => actualizarPerfil(0, 'comprobacion', opt.v)}
+                                            className={`py-3 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${perfiles[0].comprobacion === opt.v ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-gray-50 text-gray-400 border-gray-100'
                                                 }`}
                                         >
                                             {opt.l}
